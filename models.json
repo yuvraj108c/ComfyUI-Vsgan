@@ -1,0 +1,6 @@
+{
+    "upscaling": {
+        "realesr-animevideov3": "https://github.com/styler00dollar/VSGAN-tensorrt-docker/releases/download/models/realesr-animevideov3.onnx",
+        "realesr-general-wdn-x4v3": "https://huggingface.co/yuvraj108c/vsgan/resolve/main/RealESRGAN_x4plus.onnx"
+    }
+}
