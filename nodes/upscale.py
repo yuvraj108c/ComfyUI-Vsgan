@@ -20,7 +20,8 @@ class UpscaleVideoTrtNode:
             }
         }
 
-    RETURN_TYPES = ()
+    RETURN_NAMES = ("video_path",)
+    RETURN_TYPES = ("STRING",)
     FUNCTION = "main"
     CATEGORY = "Vsgan"
     OUTPUT_NODE=True
@@ -80,5 +81,5 @@ class UpscaleVideoTrtNode:
                 "resolution":f"{width} x {height}"
             }
         ] 
-        return {"ui": {"previews": previews,"data":data},}
+        return {"ui": {"previews": previews,"data":data},"result": (output_path,)}
 
