@@ -2,7 +2,7 @@ import os
 import folder_paths
 import subprocess
 import json
-from .utils import get_comfyui_basepath, get_customnode_basepath, get_config_path, get_video_metadata, get_models_path, download_file
+from .utils import get_comfyui_basepath, get_customnode_basepath, get_config_path, get_video_metadata, get_models_path, download_file, get_video_orientation
 
 models_dict = json.load(open(get_models_path()))
 models_dict = models_dict["upscaling"]
@@ -29,8 +29,10 @@ class UpscaleVideoTrtNode:
         _, filenames = Filenames
         video_path = filenames[1]
 
+        video_orientation = get_video_orientation(video_path)
+
         # check if engine exists
-        engine_path = os.path.join(ENGINE_DIR,f"{model}.engine")
+        engine_path = os.path.join(ENGINE_DIR,f"{model}_{video_orientation}.engine")
         if not os.path.exists(engine_path):
             
             # Download onnx if not exists
@@ -41,8 +43,15 @@ class UpscaleVideoTrtNode:
                 download_file(models_dict[model], onnx_path )
 
             # Create engine from onnx file
-            cmd = f"trtexec --fp16 --onnx={onnx_path} --minShapes=input:1x3x8x8 --optShapes=input:1x3x720x1280 --maxShapes=input:1x3x720x1280 --saveEngine={engine_path} --tacticSources=+CUDNN,-CUBLAS,-CUBLAS_LT --skipInference --infStreams=4 --builderOptimizationLevel=4"
-            subprocess.run(cmd,shell=True)
+            if video_orientation == "landscape":
+                cmd = f"trtexec --fp16 --onnx={onnx_path} --minShapes=input:1x3x8x8 --optShapes=input:1x3x720x1280 --maxShapes=input:1x3x720x1280 --saveEngine={engine_path} --tacticSources=+CUDNN,-CUBLAS,-CUBLAS_LT --skipInference --infStreams=4 --builderOptimizationLevel=4"
+                subprocess.run(cmd,shell=True)
+            elif video_orientation == "portrait":
+                cmd = f"trtexec --fp16 --onnx={onnx_path} --minShapes=input:1x3x8x8 --optShapes=input:1x3x1280x720 --maxShapes=input:1x3x1280x720 --saveEngine={engine_path} --tacticSources=+CUDNN,-CUBLAS,-CUBLAS_LT --skipInference --infStreams=4 --builderOptimizationLevel=4"
+                subprocess.run(cmd,shell=True)
+            else:
+                raise Exception("[vsgan] Portrait not supported..")            
+
 
 
         # save config.json
