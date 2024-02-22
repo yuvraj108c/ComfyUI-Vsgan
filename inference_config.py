@@ -10,9 +10,7 @@ vs_api_below4 = vs.__api_version__.api_major < 4
 core = vs.core
 core.num_threads = 4  # can influence ram usage
 # only needed if you are inside docker
-core.std.LoadPlugin(path="/usr/lib/x86_64-linux-gnu/libffms2.so")
 core.std.LoadPlugin(path="/usr/local/lib/libvstrt.so")
-core.std.LoadPlugin(path="/usr/local/lib/x86_64-linux-gnu/libawarpsharp2.so")
 
 
 def inference_clip(video_path="",engine_path="/root/vsgan/realesr-animevideov3.engine", clip=None):
