@@ -61,7 +61,8 @@ class UpscaleVideoTrtNode:
 
         video_name = f"{model}_{os.path.basename(video_path)}"
         output_path = os.path.join(os.path.join(get_comfyui_basepath(),"output"),video_name)
-        subprocess.run(f"ffmpeg -f vapoursynth -i {os.path.join(get_customnode_basepath(),'inference.py')} {output_path} -y",shell=True)
+        subprocess.run(f"vspipe -c y4m {os.path.join(get_customnode_basepath(),'inference.py')} - | ffmpeg -i pipe: {output_path} -y",shell=True)
+        # subprocess.run(f"ffmpeg -f vapoursynth -i {os.path.join(get_customnode_basepath(),'inference.py')} {output_path} -y",shell=True)
                     
         metadata = get_video_metadata(output_path)
         frame_rate = int(metadata["fps"])
