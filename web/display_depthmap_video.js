@@ -33,7 +33,7 @@ const upscale_video_preview = {
             element.appendChild(previewWidget.videoEl)
 
             previewWidget.videoEl.addEventListener("loadedmetadata", () => {
-                node.setSize([node.size[0], previewWidget.videoEl.offsetHeight + 50])
+                node.setSize([node.size[0], previewWidget.videoEl.offsetHeight + 75])
                 node?.graph?.setDirtyCanvas(true);
             });
         }
