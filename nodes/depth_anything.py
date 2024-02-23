@@ -9,7 +9,7 @@ class DepthAnythingTrtNode:
     def INPUT_TYPES(s):
         return {
             "required": { 
-                "video_path": ("STRING",{"default":""}),
+                "Filenames": ("VHS_FILENAMES",),
                 "engine": (os.listdir(ENGINE_DIR),)
             }
         }
@@ -20,7 +20,9 @@ class DepthAnythingTrtNode:
     CATEGORY = "Vsgan"
     OUTPUT_NODE=True
 
-    def main(self, video_path, engine):
+    def main(self, Filenames, engine):
+        _, filenames = Filenames
+        video_path = filenames[1]
 
         subfolder = "depthmap"
         output_dir = f"output/{subfolder}"
