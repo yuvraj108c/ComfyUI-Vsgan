@@ -1,0 +1,41 @@
+FROM nvcr.io/nvidia/tensorrt:24.01-py3
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN pip install --upgrade pip
+
+# zimg
+RUN apt update -y && apt-get install checkinstall -y
+RUN apt install fftw3-dev pkg-config p7zip-full autoconf libtool yasm ffmsindex libffms2-5 libffms2-dev -y && \
+  git clone https://github.com/sekrit-twc/zimg --depth 1 --recurse-submodules --shallow-submodules && cd zimg && \
+  ./autogen.sh && CFLAGS=-fPIC CXXFLAGS=-fPIC ./configure --enable-static --disable-shared && make -j$(nproc) && checkinstall -y -pkgversion=0.0 && \
+  apt install /workspace/zimg/zimg_0.0-1_amd64.deb -y
+
+# vapoursynth
+RUN apt update && apt install autoconf libtool libglib2.0-dev -y && pip install cython && git clone https://github.com/vapoursynth/vapoursynth && \
+  cd vapoursynth && ./autogen.sh && \
+  ./configure && make -j$(nproc) && make install && cd .. && ldconfig && \
+  cd vapoursynth && python setup.py bdist_wheel && pip install vapoursynth && pip cache purge
+
+# jansson
+RUN git clone https://github.com/akheron/jansson && cd jansson && autoreconf -fi && CFLAGS=-fPIC ./configure --disable-shared --enable-static && \
+  make -j$(nproc) && make install
+
+# ffmpeg
+RUN apt remove ffmpeg -y
+RUN git clone https://git.ffmpeg.org/ffmpeg.git --depth 1 && cd ffmpeg && \
+  CFLAGS=-fPIC ./configure --disable-shared --enable-static --enable-gpl --enable-version3 --disable-programs --disable-doc --disable-avdevice --disable-swresample --disable-postproc --disable-avfilter --disable-encoders --disable-muxers --disable-debug --enable-pic --extra-ldflags="-static" --extra-cflags="-march=native" && \
+  make -j$(nproc) && make install -j$(nproc)
+
+# bestsource
+RUN pip install meson ninja && git clone https://github.com/vapoursynth/bestsource && cd bestsource && git clone https://github.com/sekrit-twc/libp2p.git --depth 1 && \
+  CFLAGS=-fPIC meson setup -Dlink_static=true build && CFLAGS=-fPIC ninja -C build && ninja -C build install && pip cache purge
+
+# vs-mlrt
+RUN  git clone https://github.com/AmusementClub/vs-mlrt /workspace/vs-mlrt && cd /workspace/vs-mlrt/vstrt && mkdir build && \
+  cd build && cmake .. -DVAPOURSYNTH_INCLUDE_DIRECTORY=/workspace/vapoursynth/include -D USE_NVINFER_PLUGIN=ON && make -j$(nproc) && make install 
+
+# Reinstall ffmpeg
+RUN apt update && apt install ffmpeg -y
+
+#opencv
+RUN apt update && apt install libopencv-dev python3-opencv -y

@@ -1,3 +1,2 @@
 imageio[ffmpeg]
-httpx
-tqdm
+av
