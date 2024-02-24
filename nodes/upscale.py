@@ -3,7 +3,7 @@ import subprocess
 import json
 import torch, torchvision
 import time
-from .utils import get_comfyui_basepath, get_customnode_basepath, get_config_path, get_video_metadata, get_models_path, download_file, get_video_orientation
+from .utils import get_comfyui_basepath, get_customnode_basepath, get_config_path, get_video_metadata, get_models_path, get_video_orientation
 
 models_dict = json.load(open(get_models_path()))
 models_dict = models_dict["upscaling"]
