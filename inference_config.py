@@ -35,7 +35,7 @@ def inference_clip(video_path="",engine_path="/root/vsgan/realesr-animevideov3.e
         engine_path=engine_path,
         # tilesize=[854, 480],
         overlap=[0, 0],
-        num_streams=4,
+        num_streams=1,
     )
 
     ###############################################
