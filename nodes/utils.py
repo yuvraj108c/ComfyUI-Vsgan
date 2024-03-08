@@ -1,5 +1,6 @@
 import os
 import imageio
+from imageio_ffmpeg import get_ffmpeg_exe
 
 def get_video_metadata(video_path):
     reader = imageio.get_reader(video_path)
@@ -28,3 +29,28 @@ def get_config_path():
 
 def get_models_path():
     return os.path.join(get_customnode_basepath(),"models.json")
+
+from imageio_ffmpeg import get_ffmpeg_exe
+
+def lazy_eval(func):
+    class Cache:
+        def __init__(self, func):
+            self.res = None
+            self.func = func
+        def get(self):
+            if self.res is None:
+                self.res = self.func()
+            return self.res
+    cache = Cache(func)
+    return lambda : cache.get()
+
+def get_audio(file):
+    imageio_ffmpeg_path = get_ffmpeg_exe()
+    args = [imageio_ffmpeg_path, "-v", "error", "-i", file]
+    try:
+        res =  subprocess.run(args + ["-f", "wav", "-"],
+                              stdout=subprocess.PIPE, check=True).stdout
+    except subprocess.CalledProcessError as e:
+        logger.warning(f"Failed to extract audio from: {file}")
+        return False
+    return res

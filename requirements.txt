@@ -1,2 +1,4 @@
 imageio[ffmpeg]
 av
+asyncio
+websockets
