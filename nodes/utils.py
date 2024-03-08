@@ -1,5 +1,6 @@
 import os
 import imageio
+import asyncio
 from imageio_ffmpeg import get_ffmpeg_exe
 
 def get_video_metadata(video_path):
@@ -30,8 +31,7 @@ def get_config_path():
 def get_models_path():
     return os.path.join(get_customnode_basepath(),"models.json")
 
-from imageio_ffmpeg import get_ffmpeg_exe
-
+# https://github.com/Kosinkadink/ComfyUI-VideoHelperSuite/blob/main/videohelpersuite/utils.py#L156
 def lazy_eval(func):
     class Cache:
         def __init__(self, func):
@@ -44,13 +44,21 @@ def lazy_eval(func):
     cache = Cache(func)
     return lambda : cache.get()
 
-def get_audio(file):
-    imageio_ffmpeg_path = get_ffmpeg_exe()
-    args = [imageio_ffmpeg_path, "-v", "error", "-i", file]
-    try:
-        res =  subprocess.run(args + ["-f", "wav", "-"],
-                              stdout=subprocess.PIPE, check=True).stdout
-    except subprocess.CalledProcessError as e:
-        logger.warning(f"Failed to extract audio from: {file}")
-        return False
-    return res
+# https://github.com/ceruleandeep/ComfyUI-LLaVA-Captioner/blob/8fcd56888ca9eb13d7dd91ab0e6431ebc2ccfc9c/llava.py#L154
+def wait_for_async(async_fn, loop=None):
+    res = []
+
+    async def run_async():
+        r = await async_fn()
+        res.append(r)
+
+    if loop is None:
+        try:
+            loop = asyncio.get_event_loop()
+        except:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(run_async())
+
+    return res[0]

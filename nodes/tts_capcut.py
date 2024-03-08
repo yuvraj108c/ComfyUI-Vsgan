@@ -1,9 +1,8 @@
 import os
 import folder_paths
-import asyncio
 import websockets
 import json
-from .utils import get_audio
+from .utils import lazy_eval, wait_for_async
 
 async def convert_tts(text, speaker):
     async with websockets.connect("wss://sami-maliva.byteintlapi.com/internal/api/v1/ws") as ws:
@@ -63,11 +62,13 @@ class TTSCapcutNode:
         output_dir = os.path.join(folder_paths.get_output_directory(), subfolder)
         os.makedirs(output_dir,exist_ok=True)
 
-        result = await convert_tts(text, speaker)
-        audio_save_path = os.path.join(output_dir,f"{result["message_id"]}.wav")
+        result = wait_for_async(lambda: convert_tts(text, speaker))
+
+        audio_save_path = os.path.join(output_dir,f"{result['message_id']}.wav")
         with open(audio_save_path, 'wb') as file:
             file.write(result['audio'])
 
-        vhs_audio = lambda : get_audio(audio_save_path)
-        return (vhs_audio, audio_save_path,)
+        vhs_audio = lambda : result["audio"]
+
+        return (lazy_eval(vhs_audio), audio_save_path,)
 
